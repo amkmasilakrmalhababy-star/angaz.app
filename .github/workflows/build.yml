@@ -18,13 +18,28 @@ jobs:
         with:
           channel: 'stable'
           
-      # التعديل السحري: نقل ملف كود إنجاز مؤقتاً لحمايته، ثم إعادته بعد توليد بنية الأندرويد
+      # فحص ذكي: أخذ نسخة احتياطية فقط إذا كان الملف موجوداً بالفعل لمنع فشل السكريبت
       - name: Generate Android Structure Safely
         run: |
-          mv lib/main.dart ./main_backup.dart
-          flutter create . --platforms=android --project-name=enjaz_app --overwrite
-          rm lib/main.dart
-          mv ./main_backup.dart lib/main.dart
+          if [ -f "lib/main.dart" ]; then
+            cp lib/main.dart ./main_backup.dart
+          fi
+          
+          flutter create . --platforms=android --overwrite
+          
+          if [ -f "./main_backup.dart" ]; then
+            mkdir -p lib
+            mv ./main_backup.dart lib/main.dart
+          fi
+
+          # تأكيد وجود مجلد lib وملف رئيسي لتجنب أخطاء الفولدرات الفارغة
+          mkdir -p lib
+          if [ ! -f "lib/main.dart" ]; then
+            echo "void main() {}" > lib/main.dart
+          fi
+
+          # إصلاح أي تعارض تلقائي في ملف الإعدادات
+          sed -i 's/name: .*/name: angaz_app/' pubspec.yaml
 
       - name: Install Dependencies
         run: flutter pub get
