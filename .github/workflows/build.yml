@@ -18,9 +18,13 @@ jobs:
         with:
           channel: 'stable'
           
-      # التعديل هنا: إجبار فلاتر على اسم مشروع متوافق وإعادة الكتابة فوق الإعدادات لتجنب التعارض
-      - name: Generate Android Structure
-        run: flutter create . --platforms=android --project-name=enjaz_app --overwrite
+      # التعديل السحري: نقل ملف كود إنجاز مؤقتاً لحمايته، ثم إعادته بعد توليد بنية الأندرويد
+      - name: Generate Android Structure Safely
+        run: |
+          mv lib/main.dart ./main_backup.dart
+          flutter create . --platforms=android --project-name=enjaz_app --overwrite
+          rm lib/main.dart
+          mv ./main_backup.dart lib/main.dart
 
       - name: Install Dependencies
         run: flutter pub get
